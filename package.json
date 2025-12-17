@@ -1,6 +1,10 @@
 {
   "name": "diwrapped",
   "private": true,
+  "scripts": {
+    "ingest": "bun run ingest.ts",
+    "generate": "bun run generate.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
