@@ -356,7 +356,7 @@ async function processArtistBatch(batch: string[]) {
 }
 
 const stream = fs
-  .createReadStream('./data/diwrapped.csv')
+  .createReadStream('./data/full-data.csv')
   .pipe(csv(['time', 'song', 'artist', 'song_id', 'link']))
   .on('data', async (data) => {
     const songId = data.song_id
@@ -424,20 +424,35 @@ const stream = fs
 
     // Now insert plays data
     console.log('\nInserting play history...')
-    fs.createReadStream('./data/diwrapped.csv')
+    fs.createReadStream('./data/full-data.csv')
       .pipe(csv(['time', 'song', 'artist', 'song_id', 'link']))
       .on('data', (data) => {
         const songDbId = getOrCreateSong(data.song_id)
         if (!songDbId) {
           return
         }
-        // For artist, we'll use the first artist of the song
-        // This is a simplification - ideally we'd match by name from the CSV
 
-        const songArtists = db
-          .query(`SELECT artist_id FROM song_artists WHERE song_id = ? LIMIT 1`)
-          .get(songDbId) as { artist_id: number } | null
-        if (!songArtists) {
+        // Match artist by name from CSV to get the correct artist for this play
+        let songArtist = db
+          .query(
+            `SELECT sa.artist_id
+             FROM song_artists sa
+             JOIN artists a ON sa.artist_id = a.id
+             WHERE sa.song_id = ? AND a.name = ?
+             LIMIT 1`
+          )
+          .get(songDbId, data.artist) as { artist_id: number } | null
+
+        // Fallback to first artist if name doesn't match
+        if (!songArtist) {
+          songArtist = db
+            .query(
+              `SELECT artist_id FROM song_artists WHERE song_id = ? LIMIT 1`
+            )
+            .get(songDbId) as { artist_id: number } | null
+        }
+
+        if (!songArtist) {
           return
         }
 
@@ -452,7 +467,7 @@ const stream = fs
 
         db.query(
           'INSERT INTO plays (timestamp, song_id, artist_id) VALUES (?, ?, ?)'
-        ).run(formattedDate, songDbId, songArtists.artist_id)
+        ).run(formattedDate, songDbId, songArtist.artist_id)
       })
       .on('close', () => {
         console.log('\nAll done!')
