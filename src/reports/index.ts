@@ -15,6 +15,9 @@ import {
   artistStreaksReport,
   mostRepeatedSongsReport,
   listeningTimeByArtistReport,
+  topSongsPerMonthReport,
+  topArtistsPerMonthReport,
+  topGenresPerMonthReport,
 } from './reports'
 
 export const reportRegistry: ReportRegistry = {
@@ -107,5 +110,23 @@ export const reportRegistry: ReportRegistry = {
     name: 'Listening Time by Artist',
     description: 'Total time spent listening to each artist',
     fn: listeningTimeByArtistReport,
+  },
+  'top-songs-per-month': {
+    id: 'top-songs-per-month',
+    name: 'Top Songs per Month',
+    description: 'Top 10 songs for each month',
+    fn: topSongsPerMonthReport,
+  },
+  'top-artists-per-month': {
+    id: 'top-artists-per-month',
+    name: 'Top Artists per Month',
+    description: 'Top 10 artists for each month',
+    fn: topArtistsPerMonthReport,
+  },
+  'top-genres-per-month': {
+    id: 'top-genres-per-month',
+    name: 'Top Genres per Month',
+    description: 'Top 10 genres for each month',
+    fn: topGenresPerMonthReport,
   },
 }

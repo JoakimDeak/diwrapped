@@ -643,3 +643,151 @@ export function listeningTimeByArtistReport(db: Database): ReportRow[] {
 
   return rows
 }
+
+export function topSongsPerMonthReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [['Top Songs per Month']]
+
+  // Get list of months
+  const months = db
+    .query(
+      `
+      SELECT DISTINCT strftime('%Y-%m', timestamp) as month
+      FROM plays
+      ORDER BY month DESC
+    `
+    )
+    .all() as Array<{ month: string }>
+
+  months.forEach((monthRow) => {
+    rows.push([]) // Empty row
+    rows.push([`Month: ${monthRow.month}`])
+    rows.push(['Rank', 'Song', 'Artist', 'Plays'])
+
+    const results = db
+      .query(
+        `
+        SELECT
+          s.name as song_name,
+          a.name as artist_name,
+          COUNT(*) as play_count
+        FROM plays p
+        JOIN songs s ON p.song_id = s.id
+        JOIN artists a ON p.artist_id = a.id
+        WHERE strftime('%Y-%m', p.timestamp) = ?
+        GROUP BY s.name, a.name
+        ORDER BY play_count DESC
+        LIMIT 10
+      `
+      )
+      .all(monthRow.month) as Array<{
+        song_name: string
+        artist_name: string
+        play_count: number
+      }>
+
+    results.forEach((row, index) => {
+      rows.push([
+        String(index + 1),
+        row.song_name,
+        row.artist_name,
+        String(row.play_count),
+      ])
+    })
+  })
+
+  return rows
+}
+
+export function topArtistsPerMonthReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [['Top Artists per Month']]
+
+  // Get list of months
+  const months = db
+    .query(
+      `
+      SELECT DISTINCT strftime('%Y-%m', timestamp) as month
+      FROM plays
+      ORDER BY month DESC
+    `
+    )
+    .all() as Array<{ month: string }>
+
+  months.forEach((monthRow) => {
+    rows.push([]) // Empty row
+    rows.push([`Month: ${monthRow.month}`])
+    rows.push(['Rank', 'Artist', 'Plays'])
+
+    const results = db
+      .query(
+        `
+        SELECT
+          a.name as artist_name,
+          COUNT(*) as play_count
+        FROM plays p
+        JOIN artists a ON p.artist_id = a.id
+        WHERE strftime('%Y-%m', p.timestamp) = ?
+        GROUP BY a.name
+        ORDER BY play_count DESC
+        LIMIT 10
+      `
+      )
+      .all(monthRow.month) as Array<{
+        artist_name: string
+        play_count: number
+      }>
+
+    results.forEach((row, index) => {
+      rows.push([String(index + 1), row.artist_name, String(row.play_count)])
+    })
+  })
+
+  return rows
+}
+
+export function topGenresPerMonthReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [['Top Genres per Month']]
+
+  // Get list of months
+  const months = db
+    .query(
+      `
+      SELECT DISTINCT strftime('%Y-%m', timestamp) as month
+      FROM plays
+      ORDER BY month DESC
+    `
+    )
+    .all() as Array<{ month: string }>
+
+  months.forEach((monthRow) => {
+    rows.push([]) // Empty row
+    rows.push([`Month: ${monthRow.month}`])
+    rows.push(['Rank', 'Genre', 'Plays'])
+
+    const results = db
+      .query(
+        `
+        SELECT
+          g.name as genre_name,
+          COUNT(*) as play_count
+        FROM plays p
+        JOIN artists a ON p.artist_id = a.id
+        JOIN artist_genres ag ON a.id = ag.artist_id
+        JOIN genres g ON ag.genre_id = g.id
+        WHERE strftime('%Y-%m', p.timestamp) = ?
+        GROUP BY g.id
+        ORDER BY play_count DESC
+        LIMIT 10
+      `
+      )
+      .all(monthRow.month) as Array<{
+        genre_name: string
+        play_count: number
+      }>
+
+    results.forEach((row, index) => {
+      rows.push([String(index + 1), row.genre_name, String(row.play_count)])
+    })
+  })
+
+  return rows
+}
