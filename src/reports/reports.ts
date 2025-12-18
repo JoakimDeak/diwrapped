@@ -17,7 +17,7 @@ export function topSongsReport(db: Database): ReportRow[] {
       FROM plays p
       JOIN songs s ON p.song_id = s.id
       JOIN artists a ON p.artist_id = a.id
-      GROUP BY p.song_id, p.artist_id
+      GROUP BY s.name, a.name
       ORDER BY play_count DESC
       LIMIT 50
     `
@@ -48,10 +48,11 @@ export function topArtistsReport(db: Database): ReportRow[] {
       SELECT
         a.name as artist_name,
         COUNT(*) as total_plays,
-        COUNT(DISTINCT p.song_id) as unique_songs
+        COUNT(DISTINCT s.name) as unique_songs
       FROM plays p
       JOIN artists a ON p.artist_id = a.id
-      GROUP BY p.artist_id
+      JOIN songs s ON p.song_id = s.id
+      GROUP BY a.name
       ORDER BY total_plays DESC
       LIMIT 50
     `

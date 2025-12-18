@@ -5,7 +5,7 @@ import {
   topGenresReport,
   listeningByHourReport,
   listeningByDayOfWeekReport,
-} from './examples'
+} from './reports'
 
 export const reportRegistry: ReportRegistry = {
   'top-songs': {
