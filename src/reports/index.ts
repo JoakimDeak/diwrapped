@@ -1,6 +1,7 @@
 import { type ReportRegistry } from '../types'
 import { topSongs } from './topSongs'
 import { topArtists } from './topArtists'
+import { topAlbums } from './topAlbums'
 import { topGenres } from './topGenres'
 import { listeningByHour } from './listeningByHour'
 import { listeningByDayOfWeek } from './listeningByDayOfWeek'
@@ -16,6 +17,7 @@ import { mostRepeatedSongs } from './mostRepeatedSongs'
 import { listeningTimeByArtist } from './listeningTimeByArtist'
 import { topSongsPerMonth } from './topSongsPerMonth'
 import { topArtistsPerMonth } from './topArtistsPerMonth'
+import { topAlbumsPerMonth } from './topAlbumsPerMonth'
 import { topGenresPerMonth } from './topGenresPerMonth'
 import { oneHitWonders } from './oneHitWonders'
 import { decadeBreakdown } from './decadeBreakdown'
@@ -41,6 +43,12 @@ export const reportRegistry: ReportRegistry = [
     name: 'Top Artists',
     description: 'Your most played artists',
     fn: topArtists,
+  },
+  {
+    id: 'top-albums',
+    name: 'Top Albums',
+    description: 'Your most played albums',
+    fn: topAlbums,
   },
   {
     id: 'top-artists-weighted',
@@ -131,6 +139,12 @@ export const reportRegistry: ReportRegistry = [
     name: 'Top Artists per Month',
     description: 'Top 10 artists for each month',
     fn: topArtistsPerMonth,
+  },
+  {
+    id: 'top-albums-per-month',
+    name: 'Top Albums per Month',
+    description: 'Top 10 albums for each month',
+    fn: topAlbumsPerMonth,
   },
   {
     id: 'top-genres-per-month',
