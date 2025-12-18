@@ -376,13 +376,19 @@ export function averageSongAgeReport(db: Database): ReportRow[] {
       `
       SELECT
         AVG(
-          (julianday('now') - julianday(al.release_date)) / 365.25
+          (julianday('now') - julianday(
+            CASE
+              WHEN length(al.release_date) = 4 THEN al.release_date || '-01-01'
+              WHEN length(al.release_date) = 7 THEN al.release_date || '-01'
+              ELSE al.release_date
+            END
+          )) / 365.25
         ) as avg_age_years
       FROM plays p
       JOIN songs s ON p.song_id = s.id
       JOIN album_songs als ON s.id = als.song_id
       JOIN albums al ON als.album_id = al.id
-      WHERE al.release_date IS NOT NULL
+      WHERE al.release_date IS NOT NULL AND al.release_date != ''
     `
     )
     .get() as { avg_age_years: number }
