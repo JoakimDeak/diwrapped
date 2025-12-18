@@ -21,6 +21,7 @@ import { oneHitWonders } from './oneHitWonders'
 import { decadeBreakdown } from './decadeBreakdown'
 import { explicitContent } from './explicitContent'
 import { songLengthPreference } from './songLengthPreference'
+import { popularityBreakdown } from './popularityBreakdown'
 
 export const reportRegistry: ReportRegistry = [
   {
@@ -82,6 +83,12 @@ export const reportRegistry: ReportRegistry = [
     name: 'Average Song Popularity',
     description: 'Average Spotify popularity of your songs',
     fn: averageSongPopularity,
+  },
+  {
+    id: 'popularity-breakdown',
+    name: 'Popularity Breakdown',
+    description: 'Play distribution by popularity range',
+    fn: popularityBreakdown,
   },
   {
     id: 'song-age',
