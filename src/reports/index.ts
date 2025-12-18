@@ -5,6 +5,15 @@ import {
   topGenresReport,
   listeningByHourReport,
   listeningByDayOfWeekReport,
+  topSongsWeightedReport,
+  topArtistsWeightedReport,
+  topArtistsPercentageReport,
+  listeningMinutesReport,
+  averageSongPopularityReport,
+  averageSongAgeReport,
+  songStreaksReport,
+  artistStreaksReport,
+  mostRepeatedSongsReport,
 } from './reports'
 
 export const reportRegistry: ReportRegistry = {
@@ -14,11 +23,29 @@ export const reportRegistry: ReportRegistry = {
     description: 'Your most played songs',
     fn: topSongsReport,
   },
+  'top-songs-weighted': {
+    id: 'top-songs-weighted',
+    name: 'Top Songs (Weighted)',
+    description: 'Songs ranked by play count × unique days',
+    fn: topSongsWeightedReport,
+  },
   'top-artists': {
     id: 'top-artists',
     name: 'Top Artists',
     description: 'Your most played artists',
     fn: topArtistsReport,
+  },
+  'top-artists-weighted': {
+    id: 'top-artists-weighted',
+    name: 'Top Artists (Weighted)',
+    description: 'Artists ranked by diversity of songs played',
+    fn: topArtistsWeightedReport,
+  },
+  'top-artists-percentage': {
+    id: 'top-artists-percentage',
+    name: 'Top Artists (%)',
+    description: 'Artists as percentage of total plays',
+    fn: topArtistsPercentageReport,
   },
   'top-genres': {
     id: 'top-genres',
@@ -37,5 +64,41 @@ export const reportRegistry: ReportRegistry = {
     name: 'Listening by Day of Week',
     description: 'Your listening patterns by day of week',
     fn: listeningByDayOfWeekReport,
+  },
+  'listening-minutes': {
+    id: 'listening-minutes',
+    name: 'Listening Minutes',
+    description: 'Total listening time by period',
+    fn: listeningMinutesReport,
+  },
+  'song-popularity': {
+    id: 'song-popularity',
+    name: 'Average Song Popularity',
+    description: 'Average Spotify popularity of your songs',
+    fn: averageSongPopularityReport,
+  },
+  'song-age': {
+    id: 'song-age',
+    name: 'Average Song Age',
+    description: 'How old are the songs you listen to',
+    fn: averageSongAgeReport,
+  },
+  'song-streaks': {
+    id: 'song-streaks',
+    name: 'Song Streaks',
+    description: 'Songs with longest consecutive day streaks',
+    fn: songStreaksReport,
+  },
+  'artist-streaks': {
+    id: 'artist-streaks',
+    name: 'Artist Streaks',
+    description: 'Artists with longest consecutive day streaks',
+    fn: artistStreaksReport,
+  },
+  'most-repeated': {
+    id: 'most-repeated',
+    name: 'Most Repeated in One Day',
+    description: 'Songs you played most in a single day',
+    fn: mostRepeatedSongsReport,
   },
 }

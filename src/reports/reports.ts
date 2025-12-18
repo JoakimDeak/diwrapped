@@ -160,3 +160,394 @@ export function listeningByDayOfWeekReport(db: Database): ReportRow[] {
 
   return rows
 }
+
+export function topSongsWeightedReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Top Songs (Weighted by Consistency)'],
+    ['Rank', 'Song', 'Artist', 'Plays', 'Days', 'Score'],
+  ]
+
+  const results = db
+    .query(
+      `
+      SELECT
+        s.name as song_name,
+        a.name as artist_name,
+        COUNT(*) as play_count,
+        COUNT(DISTINCT DATE(p.timestamp)) as unique_days,
+        COUNT(*) * COUNT(DISTINCT DATE(p.timestamp)) as score
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+      JOIN artists a ON p.artist_id = a.id
+      GROUP BY s.name, a.name
+      ORDER BY score DESC
+      LIMIT 50
+    `
+    )
+    .all() as Array<{
+      song_name: string
+      artist_name: string
+      play_count: number
+      unique_days: number
+      score: number
+    }>
+
+  results.forEach((row, index) => {
+    rows.push([
+      String(index + 1),
+      row.song_name,
+      row.artist_name,
+      String(row.play_count),
+      String(row.unique_days),
+      String(row.score),
+    ])
+  })
+
+  return rows
+}
+
+export function topArtistsWeightedReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Top Artists (Weighted by Song Diversity)'],
+    ['Rank', 'Artist', 'Plays', 'Unique Songs', 'Score'],
+  ]
+
+  const results = db
+    .query(
+      `
+      SELECT
+        a.name as artist_name,
+        COUNT(*) as play_count,
+        COUNT(DISTINCT s.name) as unique_songs,
+        COUNT(*) * COUNT(DISTINCT s.name) as score
+      FROM plays p
+      JOIN artists a ON p.artist_id = a.id
+      JOIN songs s ON p.song_id = s.id
+      GROUP BY a.name
+      ORDER BY score DESC
+      LIMIT 50
+    `
+    )
+    .all() as Array<{
+      artist_name: string
+      play_count: number
+      unique_songs: number
+      score: number
+    }>
+
+  results.forEach((row, index) => {
+    rows.push([
+      String(index + 1),
+      row.artist_name,
+      String(row.play_count),
+      String(row.unique_songs),
+      String(row.score),
+    ])
+  })
+
+  return rows
+}
+
+export function topArtistsPercentageReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Top Artists (% of Total Plays)'],
+    ['Rank', 'Artist', 'Plays', '% of Total'],
+  ]
+
+  const totalPlays = (
+    db.query('SELECT COUNT(*) as total FROM plays').get() as { total: number }
+  ).total
+
+  const results = db
+    .query(
+      `
+      SELECT
+        a.name as artist_name,
+        COUNT(*) as play_count
+      FROM plays p
+      JOIN artists a ON p.artist_id = a.id
+      GROUP BY a.name
+      ORDER BY play_count DESC
+      LIMIT 50
+    `
+    )
+    .all() as Array<{ artist_name: string; play_count: number }>
+
+  results.forEach((row, index) => {
+    const percentage = ((row.play_count / totalPlays) * 100).toFixed(2)
+    rows.push([
+      String(index + 1),
+      row.artist_name,
+      String(row.play_count),
+      `${percentage}%`,
+    ])
+  })
+
+  return rows
+}
+
+export function listeningMinutesReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Listening Minutes'],
+    ['Period', 'Minutes', 'Hours'],
+  ]
+
+  // Total
+  const total = db
+    .query(
+      `
+      SELECT SUM(s.duration) / 60000.0 as total_minutes
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+    `
+    )
+    .get() as { total_minutes: number }
+
+  rows.push([
+    'Total',
+    total.total_minutes.toFixed(0),
+    (total.total_minutes / 60).toFixed(1),
+  ])
+
+  // By month
+  const byMonth = db
+    .query(
+      `
+      SELECT
+        strftime('%Y-%m', timestamp) as month,
+        SUM(s.duration) / 60000.0 as minutes
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+      GROUP BY month
+      ORDER BY month DESC
+      LIMIT 12
+    `
+    )
+    .all() as Array<{ month: string; minutes: number }>
+
+  rows.push([]) // Empty row
+  rows.push(['By Month'])
+  rows.push(['Month', 'Minutes', 'Hours'])
+  byMonth.forEach((row) => {
+    rows.push([row.month, row.minutes.toFixed(0), (row.minutes / 60).toFixed(1)])
+  })
+
+  return rows
+}
+
+export function averageSongPopularityReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Average Song Popularity'],
+    ['Metric', 'Value'],
+  ]
+
+  const result = db
+    .query(
+      `
+      SELECT
+        AVG(s.popularity) as avg_popularity,
+        MIN(s.popularity) as min_popularity,
+        MAX(s.popularity) as max_popularity
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+    `
+    )
+    .get() as {
+      avg_popularity: number
+      min_popularity: number
+      max_popularity: number
+    }
+
+  rows.push(['Average Popularity', result.avg_popularity.toFixed(2)])
+  rows.push(['Min Popularity', String(result.min_popularity)])
+  rows.push(['Max Popularity', String(result.max_popularity)])
+
+  return rows
+}
+
+export function averageSongAgeReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Average Song Age'],
+    ['Metric', 'Value'],
+  ]
+
+  const result = db
+    .query(
+      `
+      SELECT
+        AVG(
+          (julianday('now') - julianday(al.release_date)) / 365.25
+        ) as avg_age_years
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+      JOIN album_songs als ON s.id = als.song_id
+      JOIN albums al ON als.album_id = al.id
+      WHERE al.release_date IS NOT NULL
+    `
+    )
+    .get() as { avg_age_years: number }
+
+  rows.push(['Average Age (Years)', result.avg_age_years.toFixed(1)])
+
+  return rows
+}
+
+export function songStreaksReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Songs with Longest Day Streaks'],
+    ['Rank', 'Song', 'Artist', 'Longest Streak (Days)'],
+  ]
+
+  // This requires finding consecutive days for each song
+  // Using a more complex query with window functions
+  const results = db
+    .query(
+      `
+      WITH song_dates AS (
+        SELECT DISTINCT
+          s.name as song_name,
+          a.name as artist_name,
+          DATE(p.timestamp) as play_date
+        FROM plays p
+        JOIN songs s ON p.song_id = s.id
+        JOIN artists a ON p.artist_id = a.id
+      ),
+      date_groups AS (
+        SELECT
+          song_name,
+          artist_name,
+          play_date,
+          julianday(play_date) - ROW_NUMBER() OVER (
+            PARTITION BY song_name, artist_name
+            ORDER BY play_date
+          ) as grp
+        FROM song_dates
+      ),
+      streaks AS (
+        SELECT
+          song_name,
+          artist_name,
+          COUNT(*) as streak_length
+        FROM date_groups
+        GROUP BY song_name, artist_name, grp
+      )
+      SELECT
+        song_name,
+        artist_name,
+        MAX(streak_length) as longest_streak
+      FROM streaks
+      GROUP BY song_name, artist_name
+      ORDER BY longest_streak DESC
+      LIMIT 20
+    `
+    )
+    .all() as Array<{
+      song_name: string
+      artist_name: string
+      longest_streak: number
+    }>
+
+  results.forEach((row, index) => {
+    rows.push([
+      String(index + 1),
+      row.song_name,
+      row.artist_name,
+      String(row.longest_streak),
+    ])
+  })
+
+  return rows
+}
+
+export function artistStreaksReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Artists with Longest Day Streaks'],
+    ['Rank', 'Artist', 'Longest Streak (Days)'],
+  ]
+
+  const results = db
+    .query(
+      `
+      WITH artist_dates AS (
+        SELECT DISTINCT
+          a.name as artist_name,
+          DATE(p.timestamp) as play_date
+        FROM plays p
+        JOIN artists a ON p.artist_id = a.id
+      ),
+      date_groups AS (
+        SELECT
+          artist_name,
+          play_date,
+          julianday(play_date) - ROW_NUMBER() OVER (
+            PARTITION BY artist_name
+            ORDER BY play_date
+          ) as grp
+        FROM artist_dates
+      ),
+      streaks AS (
+        SELECT
+          artist_name,
+          COUNT(*) as streak_length
+        FROM date_groups
+        GROUP BY artist_name, grp
+      )
+      SELECT
+        artist_name,
+        MAX(streak_length) as longest_streak
+      FROM streaks
+      GROUP BY artist_name
+      ORDER BY longest_streak DESC
+      LIMIT 20
+    `
+    )
+    .all() as Array<{ artist_name: string; longest_streak: number }>
+
+  results.forEach((row, index) => {
+    rows.push([String(index + 1), row.artist_name, String(row.longest_streak)])
+  })
+
+  return rows
+}
+
+export function mostRepeatedSongsReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Most Repeated Songs in a Single Day'],
+    ['Rank', 'Song', 'Artist', 'Date', 'Plays'],
+  ]
+
+  const results = db
+    .query(
+      `
+      SELECT
+        s.name as song_name,
+        a.name as artist_name,
+        DATE(p.timestamp) as play_date,
+        COUNT(*) as plays_that_day
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+      JOIN artists a ON p.artist_id = a.id
+      GROUP BY s.name, a.name, play_date
+      ORDER BY plays_that_day DESC
+      LIMIT 50
+    `
+    )
+    .all() as Array<{
+      song_name: string
+      artist_name: string
+      play_date: string
+      plays_that_day: number
+    }>
+
+  results.forEach((row, index) => {
+    rows.push([
+      String(index + 1),
+      row.song_name,
+      row.artist_name,
+      row.play_date,
+      String(row.plays_that_day),
+    ])
+  })
+
+  return rows
+}
