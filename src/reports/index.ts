@@ -14,6 +14,7 @@ import {
   songStreaksReport,
   artistStreaksReport,
   mostRepeatedSongsReport,
+  listeningTimeByArtistReport,
 } from './reports'
 
 export const reportRegistry: ReportRegistry = {
@@ -100,5 +101,11 @@ export const reportRegistry: ReportRegistry = {
     name: 'Most Repeated in One Day',
     description: 'Songs you played most in a single day',
     fn: mostRepeatedSongsReport,
+  },
+  'listening-time-by-artist': {
+    id: 'listening-time-by-artist',
+    name: 'Listening Time by Artist',
+    description: 'Total time spent listening to each artist',
+    fn: listeningTimeByArtistReport,
   },
 }
