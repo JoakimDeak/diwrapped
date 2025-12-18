@@ -18,6 +18,11 @@ import {
   topSongsPerMonthReport,
   topArtistsPerMonthReport,
   topGenresPerMonthReport,
+  oneHitWondersReport,
+  musicDiscoveryRateReport,
+  decadeBreakdownReport,
+  explicitContentReport,
+  songLengthPreferenceReport,
 } from './reports'
 
 export const reportRegistry: ReportRegistry = {
@@ -128,5 +133,35 @@ export const reportRegistry: ReportRegistry = {
     name: 'Top Genres per Month',
     description: 'Top 10 genres for each month',
     fn: topGenresPerMonthReport,
+  },
+  'one-hit-wonders': {
+    id: 'one-hit-wonders',
+    name: 'One-Hit Wonders',
+    description: 'Artists you only listened to 1-2 songs from',
+    fn: oneHitWondersReport,
+  },
+  'music-discovery-rate': {
+    id: 'music-discovery-rate',
+    name: 'Music Discovery Rate',
+    description: 'New artists and songs discovered each month',
+    fn: musicDiscoveryRateReport,
+  },
+  'decade-breakdown': {
+    id: 'decade-breakdown',
+    name: 'Decade Breakdown',
+    description: 'Music distribution by decade',
+    fn: decadeBreakdownReport,
+  },
+  'explicit-content': {
+    id: 'explicit-content',
+    name: 'Explicit Content',
+    description: 'Analysis of explicit vs clean music',
+    fn: explicitContentReport,
+  },
+  'song-length-preference': {
+    id: 'song-length-preference',
+    name: 'Song Length Preference',
+    description: 'Your preference for song duration',
+    fn: songLengthPreferenceReport,
   },
 }

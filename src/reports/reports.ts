@@ -2,10 +2,7 @@ import { Database } from 'bun:sqlite'
 import { type ReportRow } from '../types'
 
 export function topSongsReport(db: Database): ReportRow[] {
-  const rows: ReportRow[] = [
-    ['Top Songs'],
-    ['Rank', 'Song', 'Artist', 'Plays'],
-  ]
+  const rows: ReportRow[] = [['Top Songs'], ['Rank', 'Song', 'Artist', 'Plays']]
 
   const results = db
     .query(
@@ -22,7 +19,11 @@ export function topSongsReport(db: Database): ReportRow[] {
       LIMIT 50
     `
     )
-    .all() as Array<{ song_name: string; artist_name: string; play_count: number }>
+    .all() as Array<{
+    song_name: string
+    artist_name: string
+    play_count: number
+  }>
 
   results.forEach((row, index) => {
     rows.push([
@@ -57,7 +58,11 @@ export function topArtistsReport(db: Database): ReportRow[] {
       LIMIT 50
     `
     )
-    .all() as Array<{ artist_name: string; total_plays: number; unique_songs: number }>
+    .all() as Array<{
+    artist_name: string
+    total_plays: number
+    unique_songs: number
+  }>
 
   results.forEach((row, index) => {
     rows.push([
@@ -72,10 +77,7 @@ export function topArtistsReport(db: Database): ReportRow[] {
 }
 
 export function topGenresReport(db: Database): ReportRow[] {
-  const rows: ReportRow[] = [
-    ['Top Genres'],
-    ['Rank', 'Genre', 'Plays'],
-  ]
+  const rows: ReportRow[] = [['Top Genres'], ['Rank', 'Genre', 'Plays']]
 
   const results = db
     .query(
@@ -102,10 +104,7 @@ export function topGenresReport(db: Database): ReportRow[] {
 }
 
 export function listeningByHourReport(db: Database): ReportRow[] {
-  const rows: ReportRow[] = [
-    ['Listening by Hour'],
-    ['Hour', 'Plays'],
-  ]
+  const rows: ReportRow[] = [['Listening by Hour'], ['Hour', 'Plays']]
 
   const results = db
     .query(
@@ -128,10 +127,7 @@ export function listeningByHourReport(db: Database): ReportRow[] {
 }
 
 export function listeningByDayOfWeekReport(db: Database): ReportRow[] {
-  const rows: ReportRow[] = [
-    ['Listening by Day of Week'],
-    ['Day', 'Plays'],
-  ]
+  const rows: ReportRow[] = [['Listening by Day of Week'], ['Day', 'Plays']]
 
   const results = db
     .query(
@@ -185,12 +181,12 @@ export function topSongsWeightedReport(db: Database): ReportRow[] {
     `
     )
     .all() as Array<{
-      song_name: string
-      artist_name: string
-      play_count: number
-      unique_days: number
-      score: number
-    }>
+    song_name: string
+    artist_name: string
+    play_count: number
+    unique_days: number
+    score: number
+  }>
 
   results.forEach((row, index) => {
     rows.push([
@@ -229,11 +225,11 @@ export function topArtistsWeightedReport(db: Database): ReportRow[] {
     `
     )
     .all() as Array<{
-      artist_name: string
-      play_count: number
-      unique_songs: number
-      score: number
-    }>
+    artist_name: string
+    play_count: number
+    unique_songs: number
+    score: number
+  }>
 
   results.forEach((row, index) => {
     rows.push([
@@ -329,17 +325,18 @@ export function listeningMinutesReport(db: Database): ReportRow[] {
   rows.push(['By Month'])
   rows.push(['Month', 'Minutes', 'Hours'])
   byMonth.forEach((row) => {
-    rows.push([row.month, row.minutes.toFixed(0), (row.minutes / 60).toFixed(1)])
+    rows.push([
+      row.month,
+      row.minutes.toFixed(0),
+      (row.minutes / 60).toFixed(1),
+    ])
   })
 
   return rows
 }
 
 export function averageSongPopularityReport(db: Database): ReportRow[] {
-  const rows: ReportRow[] = [
-    ['Average Song Popularity'],
-    ['Metric', 'Value'],
-  ]
+  const rows: ReportRow[] = [['Average Song Popularity'], ['Metric', 'Value']]
 
   const result = db
     .query(
@@ -353,10 +350,10 @@ export function averageSongPopularityReport(db: Database): ReportRow[] {
     `
     )
     .get() as {
-      avg_popularity: number
-      min_popularity: number
-      max_popularity: number
-    }
+    avg_popularity: number
+    min_popularity: number
+    max_popularity: number
+  }
 
   rows.push(['Average Popularity', result.avg_popularity.toFixed(2)])
   rows.push(['Min Popularity', String(result.min_popularity)])
@@ -366,10 +363,7 @@ export function averageSongPopularityReport(db: Database): ReportRow[] {
 }
 
 export function averageSongAgeReport(db: Database): ReportRow[] {
-  const rows: ReportRow[] = [
-    ['Average Song Age'],
-    ['Metric', 'Value (Years)'],
-  ]
+  const rows: ReportRow[] = [['Average Song Age'], ['Metric', 'Value (Years)']]
 
   // Get all ages for percentile calculations
   const ages = db
@@ -500,10 +494,10 @@ export function songStreaksReport(db: Database): ReportRow[] {
     `
     )
     .all() as Array<{
-      song_name: string
-      artist_name: string
-      longest_streak: number
-    }>
+    song_name: string
+    artist_name: string
+    longest_streak: number
+  }>
 
   results.forEach((row, index) => {
     rows.push([
@@ -591,11 +585,11 @@ export function mostRepeatedSongsReport(db: Database): ReportRow[] {
     `
     )
     .all() as Array<{
-      song_name: string
-      artist_name: string
-      play_date: string
-      plays_that_day: number
-    }>
+    song_name: string
+    artist_name: string
+    play_date: string
+    plays_that_day: number
+  }>
 
   results.forEach((row, index) => {
     rows.push([
@@ -680,10 +674,10 @@ export function topSongsPerMonthReport(db: Database): ReportRow[] {
       `
       )
       .all(monthRow.month) as Array<{
-        song_name: string
-        artist_name: string
-        play_count: number
-      }>
+      song_name: string
+      artist_name: string
+      play_count: number
+    }>
 
     results.forEach((row, index) => {
       rows.push([
@@ -732,9 +726,9 @@ export function topArtistsPerMonthReport(db: Database): ReportRow[] {
       `
       )
       .all(monthRow.month) as Array<{
-        artist_name: string
-        play_count: number
-      }>
+      artist_name: string
+      play_count: number
+    }>
 
     results.forEach((row, index) => {
       rows.push([String(index + 1), row.artist_name, String(row.play_count)])
@@ -780,13 +774,296 @@ export function topGenresPerMonthReport(db: Database): ReportRow[] {
       `
       )
       .all(monthRow.month) as Array<{
-        genre_name: string
-        play_count: number
-      }>
+      genre_name: string
+      play_count: number
+    }>
 
     results.forEach((row, index) => {
       rows.push([String(index + 1), row.genre_name, String(row.play_count)])
     })
+  })
+
+  return rows
+}
+
+export function oneHitWondersReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['One-Hit Wonders'],
+    ['Rank', 'Artist', 'Song', 'Plays'],
+  ]
+
+  const results = db
+    .query(
+      `
+      SELECT
+        a.name as artist_name,
+        COUNT(DISTINCT s.name) as unique_songs,
+        (
+          SELECT s2.name
+          FROM plays p2
+          JOIN songs s2 ON p2.song_id = s2.id
+          WHERE p2.artist_id = a.id
+          GROUP BY s2.name
+          ORDER BY COUNT(*) DESC
+          LIMIT 1
+        ) as top_song,
+        COUNT(*) as total_plays
+      FROM plays p
+      JOIN artists a ON p.artist_id = a.id
+      JOIN songs s ON p.song_id = s.id
+      GROUP BY a.name
+      HAVING unique_songs <= 2 AND total_plays >= 5
+      ORDER BY total_plays DESC
+      LIMIT 50
+    `
+    )
+    .all() as Array<{
+    artist_name: string
+    unique_songs: number
+    top_song: string
+    total_plays: number
+  }>
+
+  results.forEach((row, index) => {
+    rows.push([
+      String(index + 1),
+      row.artist_name,
+      row.top_song,
+      String(row.total_plays),
+    ])
+  })
+
+  return rows
+}
+
+export function musicDiscoveryRateReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Music Discovery Rate'],
+    ['Month', 'New Artists', 'New Songs'],
+  ]
+
+  const results = db
+    .query(
+      `
+      WITH first_plays AS (
+        SELECT
+          a.name as artist_name,
+          s.name as song_name,
+          MIN(p.timestamp) as first_play
+        FROM plays p
+        JOIN artists a ON p.artist_id = a.id
+        JOIN songs s ON p.song_id = s.id
+        GROUP BY a.name, s.name
+      )
+      SELECT
+        strftime('%Y-%m', first_play) as month,
+        COUNT(DISTINCT artist_name) as new_artists,
+        COUNT(DISTINCT song_name) as new_songs
+      FROM first_plays
+      GROUP BY month
+      ORDER BY month DESC
+    `
+    )
+    .all() as Array<{
+    month: string
+    new_artists: number
+    new_songs: number
+  }>
+
+  results.forEach((row) => {
+    rows.push([row.month, String(row.new_artists), String(row.new_songs)])
+  })
+
+  return rows
+}
+
+export function decadeBreakdownReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Decade Breakdown'],
+    ['Decade', 'Plays', '% of Total'],
+  ]
+
+  const totalPlays = (
+    db.query('SELECT COUNT(*) as total FROM plays').get() as { total: number }
+  ).total
+
+  const results = db
+    .query(
+      `
+      SELECT
+        CAST(substr(
+          CASE
+            WHEN length(al.release_date) = 4 THEN al.release_date
+            WHEN length(al.release_date) = 7 THEN substr(al.release_date, 1, 4)
+            ELSE substr(al.release_date, 1, 4)
+          END
+        , 1, 3) AS INTEGER) * 10 as decade,
+        COUNT(*) as play_count
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+      JOIN album_songs als ON s.id = als.song_id
+      JOIN albums al ON als.album_id = al.id
+      WHERE al.release_date IS NOT NULL AND al.release_date != ''
+      GROUP BY decade
+      ORDER BY decade DESC
+    `
+    )
+    .all() as Array<{ decade: number; play_count: number }>
+
+  results.forEach((row) => {
+    const percentage = ((row.play_count / totalPlays) * 100).toFixed(1)
+    rows.push([`${row.decade}s`, String(row.play_count), `${percentage}%`])
+  })
+
+  return rows
+}
+
+export function explicitContentReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [['Explicit Content Analysis'], ['Metric', 'Value']]
+
+  const totalPlays = (
+    db.query('SELECT COUNT(*) as total FROM plays').get() as { total: number }
+  ).total
+
+  const explicitPlays = (
+    db
+      .query(
+        `
+      SELECT COUNT(*) as total
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+      WHERE s.explicit = 1
+    `
+      )
+      .get() as { total: number }
+  ).total
+
+  const explicitPct = ((explicitPlays / totalPlays) * 100).toFixed(1)
+  const cleanPct = (((totalPlays - explicitPlays) / totalPlays) * 100).toFixed(
+    1
+  )
+
+  rows.push(['Total Plays', String(totalPlays)])
+  rows.push(['Explicit Plays', String(explicitPlays)])
+  rows.push(['Clean Plays', String(totalPlays - explicitPlays)])
+  rows.push(['Explicit %', `${explicitPct}%`])
+  rows.push(['Clean %', `${cleanPct}%`])
+
+  // Top explicit artists
+  rows.push([])
+  rows.push(['Top Explicit Artists'])
+  rows.push(['Rank', 'Artist', 'Explicit Plays'])
+
+  const topExplicitArtists = db
+    .query(
+      `
+      SELECT
+        a.name as artist_name,
+        COUNT(*) as explicit_plays
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+      JOIN artists a ON p.artist_id = a.id
+      WHERE s.explicit = 1
+      GROUP BY a.name
+      ORDER BY explicit_plays DESC
+      LIMIT 10
+    `
+    )
+    .all() as Array<{ artist_name: string; explicit_plays: number }>
+
+  topExplicitArtists.forEach((row, index) => {
+    rows.push([String(index + 1), row.artist_name, String(row.explicit_plays)])
+  })
+
+  return rows
+}
+
+export function songLengthPreferenceReport(db: Database): ReportRow[] {
+  const rows: ReportRow[] = [
+    ['Song Length Preference'],
+    ['Metric', 'Value (Minutes)'],
+  ]
+
+  const result = db
+    .query(
+      `
+      SELECT
+        AVG(s.duration) / 60000.0 as avg_duration,
+        MIN(s.duration) / 60000.0 as min_duration,
+        MAX(s.duration) / 60000.0 as max_duration
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+    `
+    )
+    .get() as {
+    avg_duration: number
+    min_duration: number
+    max_duration: number
+  }
+
+  // Calculate median
+  const median = db
+    .query(
+      `
+      WITH durations AS (
+        SELECT DISTINCT
+          s.duration / 60000.0 as duration_mins,
+          ROW_NUMBER() OVER (ORDER BY s.duration) as row_num,
+          COUNT(*) OVER () as total_count
+        FROM plays p
+        JOIN songs s ON p.song_id = s.id
+      )
+      SELECT duration_mins
+      FROM durations
+      WHERE row_num = CAST(total_count * 0.5 AS INTEGER)
+    `
+    )
+    .get() as { duration_mins: number } | null
+
+  rows.push(['Average', result.avg_duration.toFixed(2)])
+  rows.push(['Median', (median?.duration_mins || 0).toFixed(2)])
+  rows.push(['Shortest', result.min_duration.toFixed(2)])
+  rows.push(['Longest', result.max_duration.toFixed(2)])
+
+  // Distribution by length category
+  rows.push([])
+  rows.push(['Distribution by Length'])
+  rows.push(['Category', 'Plays', '% of Total'])
+
+  const totalPlays = (
+    db.query('SELECT COUNT(*) as total FROM plays').get() as { total: number }
+  ).total
+
+  const distribution = db
+    .query(
+      `
+      SELECT
+        CASE
+          WHEN s.duration < 120000 THEN 'Very Short (< 2 min)'
+          WHEN s.duration < 180000 THEN 'Short (2-3 min)'
+          WHEN s.duration < 240000 THEN 'Medium (3-4 min)'
+          WHEN s.duration < 300000 THEN 'Long (4-5 min)'
+          ELSE 'Very Long (5+ min)'
+        END as category,
+        COUNT(*) as play_count
+      FROM plays p
+      JOIN songs s ON p.song_id = s.id
+      GROUP BY category
+      ORDER BY
+        CASE category
+          WHEN 'Very Short (< 2 min)' THEN 1
+          WHEN 'Short (2-3 min)' THEN 2
+          WHEN 'Medium (3-4 min)' THEN 3
+          WHEN 'Long (4-5 min)' THEN 4
+          ELSE 5
+        END
+    `
+    )
+    .all() as Array<{ category: string; play_count: number }>
+
+  distribution.forEach((row) => {
+    const pct = ((row.play_count / totalPlays) * 100).toFixed(1)
+    rows.push([row.category, String(row.play_count), `${pct}%`])
   })
 
   return rows
