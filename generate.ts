@@ -8,11 +8,8 @@ async function main() {
   // Open database
   const db = new Database('db.sqlite', { readonly: true })
 
-  // Get available reports from registry
-  const availableReports = Object.values(reportRegistry)
-
   // Show interactive selection
-  const { selectedReports, cancelled } = await selectReports(availableReports)
+  const { selectedReports, cancelled } = await selectReports(reportRegistry)
 
   if (cancelled) {
     console.log('\n❌ Report generation cancelled')

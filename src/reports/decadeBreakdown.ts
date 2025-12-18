@@ -29,7 +29,7 @@ export function decadeBreakdown(db: Database): ReportRow[] {
       JOIN albums al ON als.album_id = al.id
       WHERE al.release_date IS NOT NULL AND al.release_date != ''
       GROUP BY decade
-      ORDER BY decade DESC
+      ORDER BY decade ASC
     `
     )
     .all() as Array<{ decade: number; play_count: number }>

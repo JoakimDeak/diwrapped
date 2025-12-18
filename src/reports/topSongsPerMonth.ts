@@ -10,7 +10,7 @@ export function topSongsPerMonth(db: Database): ReportRow[] {
       `
       SELECT DISTINCT strftime('%Y-%m', timestamp) as month
       FROM plays
-      ORDER BY month DESC
+      ORDER BY month ASC
     `
     )
     .all() as Array<{ month: string }>

@@ -34,7 +34,7 @@ export function listeningMinutes(db: Database): ReportRow[] {
       FROM plays p
       JOIN songs s ON p.song_id = s.id
       GROUP BY month
-      ORDER BY month DESC
+      ORDER BY month ASC
       LIMIT 12
     `
     )

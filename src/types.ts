@@ -11,6 +11,4 @@ export interface Report {
   fn: ReportFunction
 }
 
-export interface ReportRegistry {
-  [key: string]: Report
-}
+export type ReportRegistry = Report[]
