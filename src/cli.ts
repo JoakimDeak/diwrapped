@@ -90,6 +90,7 @@ export async function selectReports(
         const selectedReports = Array.from(selected)
           .sort((a, b) => a - b)
           .map((index) => availableReports[index])
+          .filter((report): report is Report => report !== undefined)
         resolve({ selectedReports, cancelled: false })
       }
     }

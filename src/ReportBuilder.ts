@@ -24,6 +24,8 @@ export class ReportBuilder {
 
     for (let i = 0; i < this.reports.length; i++) {
       const report = this.reports[i]
+      if (!report) continue
+
       console.log(`Generating report: ${report.name}...`)
 
       const reportRows = report.fn(this.db)
