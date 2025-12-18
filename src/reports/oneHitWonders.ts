@@ -26,7 +26,7 @@ export function oneHitWonders(db: Database): ReportRow[] {
       FROM plays p
       JOIN artists a ON p.artist_id = a.id
       JOIN songs s ON p.song_id = s.id
-      GROUP BY a.name
+      GROUP BY a.id
       HAVING unique_songs <= 2 AND total_plays >= 5
       ORDER BY total_plays DESC
       LIMIT 50

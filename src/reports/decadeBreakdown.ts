@@ -15,13 +15,13 @@ export function decadeBreakdown(db: Database): ReportRow[] {
     .query(
       `
       SELECT
-        CAST(substr(
+        (CAST(substr(
           CASE
             WHEN length(al.release_date) = 4 THEN al.release_date
             WHEN length(al.release_date) = 7 THEN substr(al.release_date, 1, 4)
             ELSE substr(al.release_date, 1, 4)
           END
-        , 1, 3) AS INTEGER) * 10 as decade,
+        , 1, 4) AS INTEGER) / 10) * 10 as decade,
         COUNT(*) as play_count
       FROM plays p
       JOIN songs s ON p.song_id = s.id

@@ -29,7 +29,7 @@ export function topArtistsPerMonth(db: Database): ReportRow[] {
         FROM plays p
         JOIN artists a ON p.artist_id = a.id
         WHERE strftime('%Y-%m', p.timestamp) = ?
-        GROUP BY a.name
+        GROUP BY a.id
         ORDER BY play_count DESC
         LIMIT 10
       `

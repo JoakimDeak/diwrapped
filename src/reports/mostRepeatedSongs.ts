@@ -20,7 +20,7 @@ export function mostRepeatedSongs(db: Database): ReportRow[] {
       JOIN artists a ON p.artist_id = a.id
       GROUP BY s.name, a.name, play_date
       ORDER BY plays_that_day DESC
-      LIMIT 50
+      LIMIT 20
     `
     )
     .all() as Array<{

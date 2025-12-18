@@ -19,7 +19,7 @@ export function topArtistsPercentage(db: Database): ReportRow[] {
         COUNT(*) as play_count
       FROM plays p
       JOIN artists a ON p.artist_id = a.id
-      GROUP BY a.name
+      GROUP BY a.id
       ORDER BY play_count DESC
       LIMIT 50
     `

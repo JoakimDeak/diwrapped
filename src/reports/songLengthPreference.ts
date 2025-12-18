@@ -28,23 +28,26 @@ export function songLengthPreference(db: Database): ReportRow[] {
   const median = db
     .query(
       `
-      WITH durations AS (
-        SELECT DISTINCT
+      WITH ordered_durations AS (
+        SELECT
           s.duration / 60000.0 as duration_mins,
           ROW_NUMBER() OVER (ORDER BY s.duration) as row_num,
           COUNT(*) OVER () as total_count
         FROM plays p
         JOIN songs s ON p.song_id = s.id
       )
-      SELECT duration_mins
-      FROM durations
-      WHERE row_num = CAST(total_count * 0.5 AS INTEGER)
+      SELECT AVG(duration_mins) as median_duration
+      FROM ordered_durations
+      WHERE row_num IN (
+        CAST((total_count + 1) / 2 AS INTEGER),
+        CAST((total_count + 2) / 2 AS INTEGER)
+      )
     `
     )
-    .get() as { duration_mins: number } | null
+    .get() as { median_duration: number } | null
 
   rows.push(['Average', result.avg_duration.toFixed(2)])
-  rows.push(['Median', (median?.duration_mins || 0).toFixed(2)])
+  rows.push(['Median', (median?.median_duration || 0).toFixed(2)])
   rows.push(['Shortest', result.min_duration.toFixed(2)])
   rows.push(['Longest', result.max_duration.toFixed(2)])
 

@@ -125,7 +125,8 @@ db.run(
       timestamp TEXT NOT NULL,
       song_id   INTEGER NOT NULL,
       artist_id INTEGER NOT NULL,
-      FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
+      FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE,
+      FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
     );
   `
 )
@@ -196,24 +197,24 @@ function getOrCreateGenre(name: string): number {
   return result.lastInsertRowid as number
 }
 
-// Helper function to insert or get artist ID
-function getOrCreateArtist(spotifyId: string): number | null {
+// Helper function to get artist ID
+function getArtist(spotifyId: string): number | null {
   const existing = db
     .query('SELECT id FROM artists WHERE spotify_id = ?')
     .get(spotifyId) as { id: number } | null
   return existing ? existing.id : null
 }
 
-// Helper function to insert or get song ID
-function getOrCreateSong(spotifyId: string): number | null {
+// Helper function to get song ID
+function getSong(spotifyId: string): number | null {
   const existing = db
     .query('SELECT id FROM songs WHERE spotify_id = ?')
     .get(spotifyId) as { id: number } | null
   return existing ? existing.id : null
 }
 
-// Helper function to insert or get album ID
-function getOrCreateAlbum(spotifyId: string): number | null {
+// Helper function to get album ID
+function getAlbum(spotifyId: string): number | null {
   const existing = db
     .query('SELECT id FROM albums WHERE spotify_id = ?')
     .get(spotifyId) as { id: number } | null
@@ -231,7 +232,7 @@ async function processSongBatch(batch: string[]) {
     if (!track) continue // Handle null tracks (deleted/unavailable)
 
     // Insert song
-    let songDbId = getOrCreateSong(track.id)
+    let songDbId = getSong(track.id)
     if (!songDbId) {
       songDbId = db
         .query(
@@ -279,7 +280,7 @@ async function processAlbumBatch(batch: string[]) {
     if (!album) continue
 
     // Insert album
-    const albumExists = getOrCreateAlbum(album.id)
+    const albumExists = getAlbum(album.id)
     if (!albumExists) {
       const albumId = db
         .query(
@@ -293,22 +294,10 @@ async function processAlbumBatch(batch: string[]) {
           album.popularity
         ).lastInsertRowid as number
 
-      // Link album to artists
-      for (const artist of album.artists || []) {
-        if (artist?.id) {
-          const artistDbId = getOrCreateArtist(artist.id)
-          if (artistDbId) {
-            db.query(
-              'INSERT OR IGNORE INTO album_artists (album_id, artist_id) VALUES (?, ?)'
-            ).run(albumId, artistDbId)
-          }
-        }
-      }
-
       // Link album to songs
       for (const track of album.tracks?.items || []) {
         if (track?.id) {
-          const songDbId = getOrCreateSong(track.id)
+          const songDbId = getSong(track.id)
           if (songDbId) {
             db.query(
               'INSERT OR IGNORE INTO album_songs (album_id, song_id, track_number) VALUES (?, ?, ?)'
@@ -331,7 +320,7 @@ async function processArtistBatch(batch: string[]) {
     if (!artist) continue
 
     // Insert artist
-    const artistExists = getOrCreateArtist(artist.id)
+    const artistExists = getArtist(artist.id)
     if (!artistExists) {
       const artistId = db
         .query(
@@ -396,6 +385,32 @@ const stream = fs
       await processArtistBatch(batch)
     }
 
+    // Link albums to artists
+    console.log('\nLinking albums to artists...')
+    const albumIdArray = Array.from(albumIds)
+    for (let i = 0; i < albumIdArray.length; i += 20) {
+      const batch = albumIdArray.slice(i, i + 20)
+      const data = (await fetchAlbums(batch)) as any
+
+      for (const album of data.albums) {
+        if (!album) continue
+
+        const albumDbId = getAlbum(album.id)
+        if (albumDbId) {
+          for (const artist of album.artists || []) {
+            if (artist?.id) {
+              const artistDbId = getArtist(artist.id)
+              if (artistDbId) {
+                db.query(
+                  'INSERT OR IGNORE INTO album_artists (album_id, artist_id) VALUES (?, ?)'
+                ).run(albumDbId, artistDbId)
+              }
+            }
+          }
+        }
+      }
+    }
+
     // Link songs to artists
     console.log('\nLinking songs to artists...')
     const songIdArray = Array.from(songIds)
@@ -406,11 +421,11 @@ const stream = fs
       for (const track of data.tracks) {
         if (!track) continue
 
-        const songDbId = getOrCreateSong(track.id)
+        const songDbId = getSong(track.id)
         if (songDbId) {
           for (const artist of track.artists || []) {
             if (artist?.id) {
-              const artistDbId = getOrCreateArtist(artist.id)
+              const artistDbId = getArtist(artist.id)
               if (artistDbId) {
                 db.query(
                   'INSERT OR IGNORE INTO song_artists (song_id, artist_id) VALUES (?, ?)'
@@ -427,7 +442,7 @@ const stream = fs
     fs.createReadStream('./data/full-data.csv')
       .pipe(csv(['time', 'song', 'artist', 'song_id', 'link']))
       .on('data', (data) => {
-        const songDbId = getOrCreateSong(data.song_id)
+        const songDbId = getSong(data.song_id)
         if (!songDbId) {
           return
         }

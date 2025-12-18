@@ -12,21 +12,15 @@ export function topAlbums(db: Database): ReportRow[] {
       `
       SELECT
         al.name as album_name,
-        (
-          SELECT GROUP_CONCAT(name, ', ')
-          FROM (
-            SELECT DISTINCT a2.name
-            FROM plays p2
-            JOIN artists a2 ON p2.artist_id = a2.id
-            JOIN songs s2 ON p2.song_id = s2.id
-            JOIN album_songs als2 ON s2.id = als2.song_id
-            WHERE als2.album_id = al.id
-          )
-        ) as artist_name,
+        COALESCE((
+          SELECT GROUP_CONCAT(a2.name, ', ')
+          FROM album_artists aa
+          JOIN artists a2 ON aa.artist_id = a2.id
+          WHERE aa.album_id = al.id
+        ), 'Unknown') as artist_name,
         COUNT(*) as play_count
       FROM plays p
       JOIN songs s ON p.song_id = s.id
-      JOIN artists a ON p.artist_id = a.id
       JOIN album_songs als ON s.id = als.song_id
       JOIN albums al ON als.album_id = al.id
       GROUP BY al.id

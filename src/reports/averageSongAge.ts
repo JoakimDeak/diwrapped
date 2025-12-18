@@ -10,8 +10,7 @@ export function averageSongAge(db: Database): ReportRow[] {
       `
       WITH song_ages AS (
         SELECT DISTINCT
-          s.name,
-          a.name as artist_name,
+          s.id,
           (julianday('now') - julianday(
             CASE
               WHEN length(al.release_date) = 4 THEN al.release_date || '-01-01'
@@ -21,7 +20,6 @@ export function averageSongAge(db: Database): ReportRow[] {
           )) / 365.25 as age_years
         FROM plays p
         JOIN songs s ON p.song_id = s.id
-        JOIN artists a ON p.artist_id = a.id
         JOIN album_songs als ON s.id = als.song_id
         JOIN albums al ON als.album_id = al.id
         WHERE al.release_date IS NOT NULL AND al.release_date != ''
@@ -41,8 +39,7 @@ export function averageSongAge(db: Database): ReportRow[] {
       `
       WITH song_ages AS (
         SELECT DISTINCT
-          s.name,
-          a.name as artist_name,
+          s.id,
           (julianday('now') - julianday(
             CASE
               WHEN length(al.release_date) = 4 THEN al.release_date || '-01-01'
@@ -52,7 +49,6 @@ export function averageSongAge(db: Database): ReportRow[] {
           )) / 365.25 as age_years
         FROM plays p
         JOIN songs s ON p.song_id = s.id
-        JOIN artists a ON p.artist_id = a.id
         JOIN album_songs als ON s.id = als.song_id
         JOIN albums al ON als.album_id = al.id
         WHERE al.release_date IS NOT NULL AND al.release_date != ''
@@ -65,10 +61,11 @@ export function averageSongAge(db: Database): ReportRow[] {
         FROM song_ages
       )
       SELECT
-        MAX(CASE WHEN row_num = CAST(total_count * 0.25 AS INTEGER) THEN age_years END) as p25,
-        MAX(CASE WHEN row_num = CAST(total_count * 0.50 AS INTEGER) THEN age_years END) as p50,
-        MAX(CASE WHEN row_num = CAST(total_count * 0.75 AS INTEGER) THEN age_years END) as p75
+        (SELECT age_years FROM ordered_ages WHERE row_num >= CAST(total_count * 0.25 AS INTEGER) AND row_num > 0 ORDER BY row_num LIMIT 1) as p25,
+        (SELECT age_years FROM ordered_ages WHERE row_num >= CAST(total_count * 0.50 AS INTEGER) AND row_num > 0 ORDER BY row_num LIMIT 1) as p50,
+        (SELECT age_years FROM ordered_ages WHERE row_num >= CAST(total_count * 0.75 AS INTEGER) AND row_num > 0 ORDER BY row_num LIMIT 1) as p75
       FROM ordered_ages
+      LIMIT 1
     `
     )
     .get() as { p25: number | null; p50: number | null; p75: number | null }

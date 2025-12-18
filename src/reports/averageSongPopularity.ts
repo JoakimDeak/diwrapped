@@ -26,7 +26,7 @@ export function averageSongPopularity(db: Database): ReportRow[] {
     .query(
       `
       WITH popularity_values AS (
-        SELECT DISTINCT
+        SELECT
           s.popularity,
           ROW_NUMBER() OVER (ORDER BY s.popularity) as row_num,
           COUNT(*) OVER () as total_count
@@ -34,10 +34,11 @@ export function averageSongPopularity(db: Database): ReportRow[] {
         JOIN songs s ON p.song_id = s.id
       )
       SELECT
-        MAX(CASE WHEN row_num = CAST(total_count * 0.25 AS INTEGER) THEN popularity END) as p25,
-        MAX(CASE WHEN row_num = CAST(total_count * 0.50 AS INTEGER) THEN popularity END) as p50,
-        MAX(CASE WHEN row_num = CAST(total_count * 0.75 AS INTEGER) THEN popularity END) as p75
+        (SELECT popularity FROM popularity_values WHERE row_num >= CAST(total_count * 0.25 AS INTEGER) AND row_num > 0 ORDER BY row_num LIMIT 1) as p25,
+        (SELECT popularity FROM popularity_values WHERE row_num >= CAST(total_count * 0.50 AS INTEGER) AND row_num > 0 ORDER BY row_num LIMIT 1) as p50,
+        (SELECT popularity FROM popularity_values WHERE row_num >= CAST(total_count * 0.75 AS INTEGER) AND row_num > 0 ORDER BY row_num LIMIT 1) as p75
       FROM popularity_values
+      LIMIT 1
     `
     )
     .get() as { p25: number | null; p50: number | null; p75: number | null }

@@ -47,7 +47,7 @@ export function explicitContent(db: Database): ReportRow[] {
       JOIN songs s ON p.song_id = s.id
       JOIN artists a ON p.artist_id = a.id
       WHERE s.explicit = 1
-      GROUP BY a.name
+      GROUP BY a.id
       ORDER BY explicit_plays DESC
       LIMIT 10
     `

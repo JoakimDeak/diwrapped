@@ -35,7 +35,6 @@ export function listeningMinutes(db: Database): ReportRow[] {
       JOIN songs s ON p.song_id = s.id
       GROUP BY month
       ORDER BY month ASC
-      LIMIT 12
     `
     )
     .all() as Array<{ month: string; minutes: number }>

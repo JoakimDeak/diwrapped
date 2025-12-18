@@ -16,7 +16,7 @@ export function listeningTimeByArtist(db: Database): ReportRow[] {
       FROM plays p
       JOIN artists a ON p.artist_id = a.id
       JOIN songs s ON p.song_id = s.id
-      GROUP BY a.name
+      GROUP BY a.id
       ORDER BY total_minutes DESC
       LIMIT 50
     `

@@ -12,6 +12,7 @@ export function artistStreaks(db: Database): ReportRow[] {
       `
       WITH artist_dates AS (
         SELECT DISTINCT
+          a.id as artist_id,
           a.name as artist_name,
           DATE(p.timestamp) as play_date
         FROM plays p
@@ -19,26 +20,28 @@ export function artistStreaks(db: Database): ReportRow[] {
       ),
       date_groups AS (
         SELECT
+          artist_id,
           artist_name,
           play_date,
           julianday(play_date) - ROW_NUMBER() OVER (
-            PARTITION BY artist_name
+            PARTITION BY artist_id
             ORDER BY play_date
           ) as grp
         FROM artist_dates
       ),
       streaks AS (
         SELECT
+          artist_id,
           artist_name,
           COUNT(*) as streak_length
         FROM date_groups
-        GROUP BY artist_name, grp
+        GROUP BY artist_id, grp
       )
       SELECT
         artist_name,
         MAX(streak_length) as longest_streak
       FROM streaks
-      GROUP BY artist_name
+      GROUP BY artist_id
       ORDER BY longest_streak DESC
       LIMIT 20
     `
